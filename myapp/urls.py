@@ -6,5 +6,6 @@ urlpatterns = [
     path('lunchmap/', include('lunchmap.urls')),
     path('admin/', admin.site.urls),
     path('',  RedirectView.as_view(url='/lunchmap/')),
+    path('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
 ]

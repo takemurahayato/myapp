@@ -1,21 +1,34 @@
 from django.urls import reverse_lazy
 from django.views import generic
 from .models import Category, Shop
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 
 class IndexView(generic.ListView):
     model = Shop
 
+
 class DetailView(generic.DetailView):
     model = Shop
 
-class CreateView(generic.edit.CreateView):
+class CreateView(LoginRequiredMixin, generic.edit.CreateView):
     model = Shop
-    fields = '__all__'
+    fields = ['name', 'address', 'category']
 
-class UpdateView(generic.edit.UpdateView):
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super(CreateView, self).form_valid(form)
+
+class UpdateView(LoginRequiredMixin, generic.edit.UpdateView):
     model = Shop
-    fields = '__all__'
+    fields = ['name', 'address', 'category']
 
-class DeleteView(generic.edit.DeleteView):
+def dispach(self, request, *args, **kwargs):
+    obj = self.get_object()
+    if obj.author != self.request.user:
+        raise PermissionDenied('You do not permission to edit.')
+    return super(UpdateView, self).dispach(request, *args, **kwargs)
+
+class DeleteView(LoginRequiredMixin, generic.edit.DeleteView):
     model = Shop
     success_url = reverse_lazy('lunchmap:index')
